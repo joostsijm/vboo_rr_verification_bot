@@ -13,6 +13,7 @@ psycopg2-binary = "*"
 python-dotenv = "*"
 apscheduler = "*"
 python-telegram-bot = "*"
+python-dateutil = "*"
 
 [requires]
 python_version = "3"
