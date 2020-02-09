@@ -3,6 +3,7 @@
 from telegram import ParseMode
 from telegram.ext import MessageHandler, CommandHandler, Filters, ConversationHandler, RegexHandler
 
+from app import api, functions
 
 ACCOUNT_ID, CONFIRM, VERIFICATION = range(3)
 
@@ -23,14 +24,20 @@ def conv_error_ask_account_id(update, context):
 
 def conv_account_id_confirm(update, context):
     """Sending announcement"""
+    update.message.reply_text(
+        'Retreiving account from Rival Regions, this might take a couple seconds.'
+    )
     account_id = update.message.text
+    # account = api.get_rr_account(2000326045)
+    account = api.get_rr_account(account_id)
 
     message_list = [
-        '**Account details**',
-        'ID: {}'.format(account_id),
-        'Name: {}'.format(account_id),
-        'Region: {}'.format(account_id),
-        'Residency: {}'.format(account_id),
+        '*Account details*',
+        '*ID*: {}'.format(account_id),
+        '*Name*: {}'.format(functions.escape_text(account['name'])),
+        '*Region*: {}'.format(account['region']),
+        '*Residency*: {}'.format(account['residency']),
+        '*Registration date*: {}'.format(account['registation_date']),
         '\nPlease confirm this is your account by typing \'confirm\'',
     ]
 

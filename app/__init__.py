@@ -50,7 +50,7 @@ SCHEDULER = BackgroundScheduler(
 SCHEDULER.start()
 
 TELEGRAM_KEY = os.environ['TELEGRAM_KEY']
-BOT = telegram.Bot(token=TELEGRAM_KEY)
+# BOT = telegram.Bot(token=TELEGRAM_KEY)
 UPDATER = Updater(TELEGRAM_KEY, use_context=True)
 
 # api
