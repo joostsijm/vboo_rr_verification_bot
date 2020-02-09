@@ -1,7 +1,7 @@
 """Add account conversation"""
 
 from telegram import ParseMode
-from telegram.ext import MessageHandler, CommandHandler, Filters, ConversationHandler, RegexHandler
+from telegram.ext import MessageHandler, CommandHandler, Filters, ConversationHandler
 
 from app import api, functions
 
@@ -85,7 +85,7 @@ ADD_ACCOUNT_CONV = ConversationHandler(
     entry_points=[CommandHandler('add_account', conv_ask_account_id)],
     states={
         ACCOUNT_ID: [
-            RegexHandler(r'^\d*$', conv_account_id_confirm),
+            MessageHandler(Filters.regex(r'^\d*$'), conv_account_id_confirm),
             MessageHandler(Filters.text, conv_error_ask_account_id),
         ],
         CONFIRM: [
