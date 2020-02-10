@@ -144,7 +144,7 @@ def conv_finish(update, context):
     )
     database.verify_rr_player(update.message.from_user.id, player_id)
     update.message.reply_text(
-        'Verificated your Rival Region player to Telegram. Type /players to see your players',
+        'Verificated your Rival Region player to Telegram. Type /accounts to see your accounts',
         parse_mode=ParseMode.MARKDOWN
     )
     context.user_data.clear()
@@ -167,8 +167,8 @@ def conv_cancel(update, context):
     return ConversationHandler.END
 
 # announcement conversation
-ADD_ACCOUNT_CONV = ConversationHandler(
-    entry_points=[CommandHandler('add_account', conv_ask_player_id)],
+ADD_CONV = ConversationHandler(
+    entry_points=[CommandHandler('add', conv_ask_player_id)],
     states={
         PLAYER_ID: [
             MessageHandler(Filters.regex(r'^\d*$'), conv_player_id_confirm),

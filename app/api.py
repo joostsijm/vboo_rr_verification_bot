@@ -9,14 +9,14 @@ from dateutil import parser
 from app import BASE_URL, HEADERS
 
 
-def get_rr_account(account_id):
-    """Get Rival Region account"""
+def get_rr_player(player_id):
+    """Get Rival Region player"""
     response = requests.get(
-        '{}slide/profile/{}'.format(BASE_URL, account_id),
+        '{}slide/profile/{}'.format(BASE_URL, player_id),
         headers=HEADERS
     )
     soup = BeautifulSoup(response.text, 'html.parser')
-    account = {
+    player = {
         'name': None,
         'region': None,
         'residency': None,
@@ -25,40 +25,40 @@ def get_rr_account(account_id):
     table = soup.find('table')
     name = soup.find('h1')
     if name:
-        account['name'] = re.sub(r'.*:\s', '', name.text)
+        player['name'] = re.sub(r'.*:\s', '', name.text)
     for row in table.find_all('tr'):
         label = row.find('td').text.strip() 
         if label == 'Region:':
             span = row.find('span', {'class': 'dot'})
             if span:
-                account['region'] = span.text
+                player['region'] = span.text
         if label == 'Residency:':
             span = row.find('span', {'class': 'dot'})
             if span:
-                account['residency'] = span.text
+                player['residency'] = span.text
         if label == 'Registration date:':
             element = row.find('td', {'class': 'imp'})
             if element:
-                account['registation_date'] = parser.parse(element.text)
+                player['registation_date'] = parser.parse(element.text)
 
-    return account
+    return player
 
-def get_accounts_by_name(account_name):
-    """Get account list by name"""
+def get_players_by_name(player_name):
+    """Get player list by name"""
     response = requests.get(
-        '{}listed/region/0/{}/0'.format(BASE_URL, account_name),
+        '{}listed/region/0/{}/0'.format(BASE_URL, player_name),
         headers=HEADERS,
     )
     soup = BeautifulSoup(response.text, 'html.parser')
-    accounts = []
-    account_items = soup.find_all('tr', {'class': 'list_link'})
-    for account_item in account_items:
-        accounts.append({
-            'id': int(account_item.get('user')),
-            'name': account_item.find('td', {'class': 'list_name'}).text.strip(),
-            'level': int(account_item.find('td', {'class': 'list_level'}).text),
+    players = []
+    player_items = soup.find_all('tr', {'class': 'list_link'})
+    for player_item in player_items:
+        players.append({
+            'id': int(player_item.get('user')),
+            'name': player_item.find('td', {'class': 'list_name'}).text.strip(),
+            'level': int(player_item.find('td', {'class': 'list_level'}).text),
         })
-    return accounts
+    return players
 
 def send_personal_message(user_id, message):
     """Send personal message to player"""

@@ -3,7 +3,7 @@
 from telegram.ext import CommandHandler
 
 from app import LOGGER, UPDATER, commands
-from app.conversations.add_account import ADD_ACCOUNT_CONV
+from app.conversations.add import ADD_CONV
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
     dispatcher.add_handler(CommandHandler('accounts', commands.cmd_accounts))
 
     # conversations
-    dispatcher.add_handler(ADD_ACCOUNT_CONV)
+    dispatcher.add_handler(ADD_CONV)
 
     UPDATER.start_polling()
     UPDATER.idle()
