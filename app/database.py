@@ -6,47 +6,47 @@ from app import SESSION, LOGGER
 from app.models import Player, TelegramAccount, TelegramHandle, PlayerTelegram
 
 
-def add_telegram_account(update):
-    """Add new Telegram account"""
+def add_telegram_player(update):
+    """Add new Telegram player"""
     session = SESSION()
-    telegram_account = TelegramAccount()
-    telegram_account.id = update.message.from_user.id
-    telegram_account.name = update.message.from_user.name
-    telegram_account.registration_date = datetime.now()
-    session.add(telegram_account)
+    telegram_player = TelegramAccount()
+    telegram_player.id = update.message.from_user.id
+    telegram_player.name = update.message.from_user.name
+    telegram_player.registration_date = datetime.now()
+    session.add(telegram_player)
     session.commit()
     session.close()
-    return telegram_account
+    return telegram_player
 
-def get_telegram_account(telegram_id):
-    """Get Telegram account"""
+def get_telegram_player(telegram_id):
+    """Get Telegram player"""
     session = SESSION()
-    telegram_account = _get_telegram_account(session, telegram_id)
+    telegram_player = _get_telegram_player(session, telegram_id)
     session.close()
-    return telegram_account
+    return telegram_player
 
-def get_rr_accounts(telegram_account):
-    """Get Rival Region accounts associated with Telegram account"""
+def get_rr_players(telegram_player):
+    """Get Rival Region players associated with Telegram player"""
     LOGGER.info(
-        '"%s" get RR accounts',
-        telegram_account.id,
+        '"%s" get RR players',
+        telegram_player.id,
     )
     session = SESSION()
-    accounts = _get_rr_accounts(session, telegram_account.id)
+    players = _get_rr_players(session, telegram_player.id)
     session.close()
-    return accounts
+    return players
 
-def verify_rr_account(telegram_id, account_id):
-    """Verify RR account in database"""
+def verify_rr_player(telegram_id, player_id):
+    """Verify RR player in database"""
     session = SESSION()
-    telegram_account = _get_telegram_account(session, telegram_id)
-    accounts = _get_rr_accounts(session, telegram_id)
-    for account in accounts:
-        if account.id == account_id:
+    telegram_player = _get_telegram_player(session, telegram_id)
+    players = _get_rr_players(session, telegram_id)
+    for player in players:
+        if player.id == player_id:
             LOGGER.info(
-                '"%s" account already connected "%s"',
+                '"%s" player already connected "%s"',
                 telegram_id,
-                account_id
+                player_id
             )
             session.close()
             return
@@ -56,34 +56,34 @@ def verify_rr_account(telegram_id, account_id):
         .all()
     for active_player_telegram in active_player_telegrams:
         LOGGER.info(
-            '"%s" unconnect account "%s"',
+            '"%s" unconnect player "%s"',
             active_player_telegram.telegram_id,
-            account_id
+            player_id
         )
         active_player_telegram.until_date_time = datetime.now()
 
     LOGGER.info(
-        '"%s" connecting account "%s"',
+        '"%s" connecting player "%s"',
         telegram_id,
-        account_id
+        player_id
     )
     player_telegram = PlayerTelegram()
-    player_telegram.telegram_id = telegram_account.id
-    player_telegram.player_id = account_id
+    player_telegram.telegram_id = telegram_player.id
+    player_telegram.player_id = player_id
     player_telegram.from_date_time = datetime.now()
     session.add(player_telegram)
     session.commit()
     session.close()
 
-def _get_telegram_account(session, telegram_id):
-    """Return telegram_account"""
+def _get_telegram_player(session, telegram_id):
+    """Return telegram_player"""
     return session.query(TelegramAccount).get(telegram_id)
 
-def _get_rr_accounts(session, telegram_account_id):
-    """Get Rival Region accounts associated with Telegram account"""
+def _get_rr_players(session, telegram_player_id):
+    """Get Rival Region players associated with Telegram player"""
     return session.query(Player) \
         .join(Player.player_telegram) \
-        .filter(PlayerTelegram.telegram_id == telegram_account_id) \
+        .filter(PlayerTelegram.telegram_id == telegram_player_id) \
         .filter(PlayerTelegram.until_date_time == None) \
         .all()
 
