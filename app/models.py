@@ -48,12 +48,3 @@ class PlayerTelegram(Base):
         'Player',
         backref=backref('player_telegram', lazy='dynamic')
     )
-
-class TelegramVerification(Base):
-    """Model for Telegram verification"""
-    __tablename__ = 'telegram_verification'
-    player_id = Column(BigInteger, ForeignKey('player.id'), primary_key=True)
-    telegram_id = Column(BigInteger, ForeignKey('telegram_account.id'), primary_key=True)
-    code = Column(String)
-    date_time = Column(DateTime)
-    confirmed = Column(Boolean, server_default='f', default=False)

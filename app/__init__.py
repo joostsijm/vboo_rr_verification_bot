@@ -15,17 +15,17 @@ load_dotenv()
 
 # get logger
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(logging.INFO)
 TELEGRAM_LOGGER = logging.getLogger('telegram')
-TELEGRAM_LOGGER.setLevel(logging.DEBUG)
+TELEGRAM_LOGGER.setLevel(logging.INFO)
 
 # create file handler
 FILE_HANDLER = logging.FileHandler('output.log')
-FILE_HANDLER.setLevel(logging.DEBUG)
+FILE_HANDLER.setLevel(logging.INFO)
 
 # create console handler
 STREAM_HANDLER = logging.StreamHandler()
-STREAM_HANDLER.setLevel(logging.DEBUG)
+STREAM_HANDLER.setLevel(logging.INFO)
 
 # create formatter and add it to the handlers
 FORMATTER = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
