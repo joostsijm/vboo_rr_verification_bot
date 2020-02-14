@@ -14,7 +14,10 @@ PLAYER_ID, CHOOSE, CONFIRM, VERIFICATION = range(4)
 def conv_ask_player_id(update, context):
     """Ask player id"""
     LOGGER.info('"@%s" start add player conversation', update.message.from_user.username)
-    update.message.reply_text('Send me your Rival Regions player name or ID.')
+    update.message.reply_text(
+        'Starting add account conversation, use /cancel to stop.' +
+        ' Send me your Rival Regions account name or ID.'
+    )
     return PLAYER_ID
 
 def conv_player_choose(update, context):
@@ -25,12 +28,13 @@ def conv_player_choose(update, context):
         update.message.from_user.username,
         player_name
     )
+    update.message.reply_text('searching for \'{}\', this may take some time'.format(player_name))
     players = api.get_players_by_name(player_name)
     if len(players) == 0:
-        update.message.reply_text('No players found witht that name, try again')
+        update.message.reply_text('No accounts found witht that name, try again')
         return PLAYER_ID
     context.user_data['player_list'] = players
-    message = 'Chose from list:\n'
+    message = 'Choose from list:\n'
     for num, player in enumerate(players, start=1):
         message += '{}) {} ({})\n'.format(num, player['name'], player['level'])
     update.message.reply_text(message)

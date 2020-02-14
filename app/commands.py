@@ -9,7 +9,7 @@ def cmd_start(update, context):
     """Start command"""
     LOGGER.info('"@%s" start bot', update.message.from_user.username)
     update.message.reply_text(
-        'Hello {}, use /add to add an player, use /help for a list of commands.'.format(
+        'Hello {}, use /add to add an account, use /help for a list of commands.'.format(
             update.message.from_user.first_name
         )
     )
@@ -23,14 +23,14 @@ def cmd_help(update, context):
     message_list = [
         '**Command list**',
         '/add - add account to list',
-        '/players - list of accounts',
+        '/accounts - list of accounts',
     ]
     message = '\n'.join(message_list)
     update.message.reply_text(message, parse_mode=ParseMode.MARKDOWN)
 
 def cmd_accounts(update, context):
     """Return player list"""
-    message_list = ['Accounts verified to this Telgeram player:']
+    message_list = ['Accounts verified to this Telgeram account:']
     telegram_player = database.get_telegram_player(update.message.from_user.id)
     if telegram_player:
         players = database.get_rr_players(telegram_player)
