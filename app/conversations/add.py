@@ -13,7 +13,7 @@ PLAYER_ID, CHOOSE, CONFIRM, VERIFICATION = range(4)
 
 def conv_ask_player_id(update, context):
     """Ask player id"""
-    LOGGER.info('"@%s" start add player conversation', update.message.from_user.username)
+    LOGGER.info('"@%s" start add account conversation', update.message.from_user.username)
     update.message.reply_text(
         'Starting add account conversation, use /cancel to stop.' +
         ' Send me your Rival Regions account name or ID.'
@@ -91,7 +91,7 @@ def conv_player_id_confirm(update, context):
 def ask_confirmation(update, player_id):
     """Get account and ask for confirmation"""
     LOGGER.info(
-        '"@%s" RR player id "%s"',
+        '"@%s" Ask for confirmation RR account id "%s"',
         update.message.from_user.username,
         player_id
     )
@@ -207,7 +207,7 @@ ADD_CONV = ConversationHandler(
             MessageHandler(Filters.text, conv_player_choose),
         ],
         CONFIRM: [
-            MessageHandler(Filters.regex('confirm'), conv_verification),
+            MessageHandler(Filters.regex('(?i)confirm'), conv_verification),
             MessageHandler(Filters.text, conv_cancel),
         ],
         VERIFICATION: [
