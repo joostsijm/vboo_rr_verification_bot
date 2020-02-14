@@ -8,6 +8,7 @@ from app.conversations.add import ADD_CONV
 
 def main():
     """Main function"""
+    LOGGER.info('Start application')
     dispatcher = UPDATER.dispatcher
 
     # commands

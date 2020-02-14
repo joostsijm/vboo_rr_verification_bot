@@ -28,11 +28,19 @@ def conv_player_choose(update, context):
         update.message.from_user.username,
         player_name
     )
-    update.message.reply_text('searching for \'{}\', this may take some time'.format(player_name))
+    update.message.reply_text(
+        'Searching for \'{}\', this might take a couple seconds.'.format(player_name)
+    )
     players = api.get_players_by_name(player_name)
     if len(players) == 0:
-        update.message.reply_text('No accounts found witht that name, try again')
+        update.message.reply_text('No accounts found witht that name, try again.')
         return PLAYER_ID
+    if len(players) == 1:
+        player = players[0]
+        player_id = player['id']
+        context.user_data['player_id'] = player_id
+        ask_confirmation(update, player_id)
+        return CONFIRM
     context.user_data['player_list'] = players
     message = 'Choose from list:\n'
     for num, player in enumerate(players, start=1):
@@ -67,8 +75,13 @@ def conv_player_id_confirm(update, context):
         player_id = player['id']
     context.user_data['player_id'] = player_id
     update.message.reply_text(
-        'Retreiving player from Rival Regions, this might take a couple seconds.'
+        'Retreiving account from Rival Regions, this might take a couple seconds.'
     )
+    ask_confirmation(update, player_id)
+    return CONFIRM
+
+def ask_confirmation(update, player_id):
+    """Get account and ask for confirmation"""
     LOGGER.info(
         '"@%s" RR player id "%s"',
         update.message.from_user.username,
@@ -83,14 +96,14 @@ def conv_player_id_confirm(update, context):
         '*Region*: {}'.format(player['region']),
         '*Residency*: {}'.format(player['residency']),
         '*Registration date*: {}'.format(player['registation_date']),
-        '\nPlease confirm this is your player by typing \'confirm\'.',
     ]
 
     update.message.reply_text(
         '\n'.join(message_list),
         parse_mode=ParseMode.MARKDOWN
     )
-    return CONFIRM
+    update.message.reply_text('Please confirm this is your account by typing \'confirm\'.')
+        
 
 def conv_verification(update, context):
     """Sending announcement"""
@@ -107,6 +120,9 @@ def conv_verification(update, context):
         verification_code
     )
     message = 'Your verification code:\n{}\n\n'.format(verification_code) + \
+    'Telegram user @{} tried to add this account. '.format(
+        update.message.from_user.username
+    ) + \
     'Please don\'t share this code except with @rr_verification_bot on Telegram.'
     api.send_personal_message(context.user_data['player_id'], message)
     context.user_data['verification_code'] = verification_code
