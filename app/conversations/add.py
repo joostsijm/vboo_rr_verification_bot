@@ -43,7 +43,15 @@ def conv_player_choose(update, context):
             context.user_data.clear()
             return ConversationHandler.END
         context.user_data['player_id'] = player_id
-        ask_confirmation(update, player_id)
+        player = get_player(player_id)
+        if not player:
+            LOGGER.warn(
+                '"@%s" Can\'t find RR player ID "%s"',
+                update.message.from_user.username, player_id
+            )
+            update.message.reply_text('Couldn\'t find an account by that ID, try again.')
+            return PLAYER_ID
+        ask_confirmation(update, player)
         return CONFIRM
     context.user_data['player_list'] = players
     message = 'Choose from list:\n'
@@ -52,23 +60,8 @@ def conv_player_choose(update, context):
     update.message.reply_text(message)
     return CHOOSE
 
-def conv_player_number_error(update, context):
-    """Wrong input error"""
-    incorrect_input = update.message.text
-    LOGGER.info(
-        '"@%s" incorrect number number "%s"',
-        update.message.from_user.username,
-        incorrect_input
-    )
-    update.message.reply_text(
-        '{}, I don\'t recognize that. What number?'.format(
-            incorrect_input
-        )
-    )
-    return CHOOSE
-
 def conv_player_id_confirm(update, context):
-    """Confirm player """
+    """Confirm player ID"""
     player_id = int(update.message.text)
     if player_id <= 25:
         player_index = player_id-1
@@ -85,21 +78,34 @@ def conv_player_id_confirm(update, context):
     update.message.reply_text(
         'Retreiving account from Rival Regions, this might take a couple seconds.'
     )
-    ask_confirmation(update, player_id)
+    player = get_player(player_id)
+    if not player:
+        LOGGER.warn(
+            '"@%s" Can\'t find RR player ID "%s"',
+            update.message.from_user.username, player_id
+        )
+        update.message.reply_text('Couldn\'t find an account by that ID, try again.')
+        return CHOOSE
+    ask_confirmation(update, player)
     return CONFIRM
 
-def ask_confirmation(update, player_id):
+def get_player(player_id):
+    """Get player by ID"""
+    try:
+        return api.get_rr_player(player_id)
+    except api.PlayerNotFoundException:
+        return False
+
+def ask_confirmation(update, player):
     """Get account and ask for confirmation"""
     LOGGER.info(
-        '"@%s" Ask for confirmation RR account id "%s"',
-        update.message.from_user.username,
-        player_id
+        '"@%s" Ask for confirmation on RR player ID "%s"',
+        update.message.from_user.username, player.id
     )
-    player = api.get_rr_player(player_id)
 
     message_list = [
         '*Player details*',
-        '*ID*: {}'.format(player_id),
+        '*ID*: {}'.format(player.id),
         '*Name*: {}'.format(functions.escape_text(player['name'])),
         '*Region*: {}'.format(player['region']),
         '*Residency*: {}'.format(player['residency']),
@@ -166,7 +172,7 @@ def conv_finish(update, context):
         return VERIFICATION
     player_id = context.user_data['player_id']
     LOGGER.info(
-        '"@%s" succesfully verified RR player "%s"',
+        '"@%s" succesfully verified RR account "%s"',
         update.message.from_user.username,
         player_id,
     )

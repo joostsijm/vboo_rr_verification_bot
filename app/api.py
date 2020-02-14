@@ -6,7 +6,13 @@ import requests
 from bs4 import BeautifulSoup
 from dateutil import parser
 
-from app import BASE_URL, HEADERS
+from app import BASE_URL, HEADERS, LOGGER
+
+class PlayerNotFoundException(Exception):
+    """RR exception"""
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+        LOGGER.warning('PlayerNotFoundException')
 
 
 def get_rr_player(player_id):
@@ -23,6 +29,8 @@ def get_rr_player(player_id):
         'registation_date': None,
     }
     table = soup.find('table')
+    if table is None:
+        raise PlayerNotFoundException('Player {} not found'.format(player_id))
     name = soup.find('h1')
     if name:
         player['name'] = re.sub(r'.*:\s', '', name.text)
