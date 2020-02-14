@@ -52,7 +52,8 @@ def verify_rr_player(telegram_id, player_id):
             return
 
     active_player_telegrams = session.query(PlayerTelegram) \
-        .filter(PlayerTelegram.until_date_time != None) \
+        .filter(PlayerTelegram.until_date_time == None) \
+        .filter(PlayerTelegram.player_id == player_id) \
         .all()
     for active_player_telegram in active_player_telegrams:
         LOGGER.info(
@@ -75,6 +76,19 @@ def verify_rr_player(telegram_id, player_id):
     session.commit()
     session.close()
 
+
+def is_connected(telegram_id, player_id):
+    """Check if account is already"""
+    session = SESSION()
+    player_telegram = session.query(PlayerTelegram) \
+        .filter(PlayerTelegram.until_date_time == None) \
+        .filter(PlayerTelegram.telegram_id == telegram_id) \
+        .filter(PlayerTelegram.player_id == player_id) \
+        .first()
+    session.close()
+    return bool(player_telegram)
+
+
 def _get_telegram_player(session, telegram_id):
     """Return telegram_player"""
     return session.query(TelegramAccount).get(telegram_id)
@@ -86,4 +100,3 @@ def _get_rr_players(session, telegram_player_id):
         .filter(PlayerTelegram.telegram_id == telegram_player_id) \
         .filter(PlayerTelegram.until_date_time == None) \
         .all()
-

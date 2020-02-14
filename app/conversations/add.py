@@ -38,6 +38,10 @@ def conv_player_choose(update, context):
     if len(players) == 1:
         player = players[0]
         player_id = player['id']
+        if database.is_connected(update.message.from_user.id, player_id):
+            update.message.reply_text('Account already connected.')
+            context.user_data.clear()
+            return ConversationHandler.END
         context.user_data['player_id'] = player_id
         ask_confirmation(update, player_id)
         return CONFIRM
@@ -73,6 +77,10 @@ def conv_player_id_confirm(update, context):
             return CHOOSE
         player = context.user_data['player_list'][player_index]
         player_id = player['id']
+    if database.is_connected(update.message.from_user.id, player_id):
+        update.message.reply_text('Account already connected.')
+        context.user_data.clear()
+        return ConversationHandler.END
     context.user_data['player_id'] = player_id
     update.message.reply_text(
         'Retreiving account from Rival Regions, this might take a couple seconds.'
@@ -171,7 +179,7 @@ def conv_finish(update, context):
     return ConversationHandler.END
 
 def conv_error_finish(update, context):
-    """Ask max resource"""
+    """Wrong verification code"""
     incorrect_input = update.message.text
     update.message.reply_text(
         '"{}" not recognized. Send me the verification code.\n/cancel to cancel'.format(
