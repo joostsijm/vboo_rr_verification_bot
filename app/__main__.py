@@ -4,6 +4,7 @@ from telegram.ext import CommandHandler
 
 from app import LOGGER, UPDATER, commands
 from app.conversations.add import ADD_CONV
+from app.conversations.remove import REMOVE_CONV
 
 
 def main():
@@ -18,6 +19,7 @@ def main():
 
     # conversations
     dispatcher.add_handler(ADD_CONV)
+    dispatcher.add_handler(REMOVE_CONV)
 
     UPDATER.start_polling()
     UPDATER.idle()

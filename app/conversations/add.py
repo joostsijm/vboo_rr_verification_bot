@@ -6,18 +6,20 @@ import string
 from telegram import ParseMode
 from telegram.ext import MessageHandler, CommandHandler, Filters, ConversationHandler
 
-from app import api, functions, database, HEADERS, BASE_URL, LOGGER
+from app import api, functions, database, commands, HEADERS, BASE_URL, LOGGER
 
 
 PLAYER_ID, CHOOSE, CONFIRM, VERIFICATION = range(4)
 
+def conv_start(update, context):
+    """Start conversation"""
+    LOGGER.info('"@%s" start add account conversation', update.message.from_user.username)
+    update.message.reply_text('Starting add account conversation, use /cancel to stop.')
+    return conv_ask_player_id(update, context)
+
 def conv_ask_player_id(update, context):
     """Ask player id"""
-    LOGGER.info('"@%s" start add account conversation', update.message.from_user.username)
-    update.message.reply_text(
-        'Starting add account conversation, use /cancel to stop.' +
-        ' Send me your Rival Regions account name or ID.'
-    )
+    update.message.reply_text('Send me your Rival Regions account name or ID.')
     return PLAYER_ID
 
 def conv_player_choose(update, context):
@@ -39,7 +41,7 @@ def conv_player_choose(update, context):
         player = players[0]
         player_id = player['id']
         if database.is_connected(update.message.from_user.id, player_id):
-            update.message.reply_text('Account already connected.')
+            update.message.reply_text('Account already connected, ending conversation.')
             context.user_data.clear()
             return ConversationHandler.END
         context.user_data['player_id'] = player_id
@@ -65,6 +67,8 @@ def conv_player_id_confirm(update, context):
     player_id = int(update.message.text)
     if player_id <= 25:
         player_index = player_id-1
+        if 'player_list' not in context.user_data:
+            return conv_ask_player_id(update, context)
         if player_index >= len(context.user_data['player_list']):
             update.message.reply_text('{} is not an option, try again.'.format(player_id),)
             return CHOOSE
@@ -100,12 +104,12 @@ def ask_confirmation(update, player):
     """Get account and ask for confirmation"""
     LOGGER.info(
         '"@%s" Ask for confirmation on RR player ID "%s"',
-        update.message.from_user.username, player.id
+        update.message.from_user.username, player['id']
     )
 
     message_list = [
         '*Player details*',
-        '*ID*: {}'.format(player.id),
+        '*ID*: {}'.format(player['id']),
         '*Name*: {}'.format(functions.escape_text(player['name'])),
         '*Region*: {}'.format(player['region']),
         '*Residency*: {}'.format(player['residency']),
@@ -118,7 +122,6 @@ def ask_confirmation(update, player):
     )
     update.message.reply_text('Please confirm this is your account by typing \'confirm\'.')
         
-
 def conv_verification(update, context):
     """Sending announcement"""
     update.message.reply_text(
@@ -137,7 +140,7 @@ def conv_verification(update, context):
     'Telegram user @{} tried to add this account. '.format(
         update.message.from_user.username
     ) + \
-    'Please don\'t share this code except with @rr_verification_bot on Telegram.'
+    'Don\'t share this code with anyone except @rr_verification_bot on Telegram.'
     api.send_personal_message(context.user_data['player_id'], message)
     context.user_data['verification_code'] = verification_code
     return VERIFICATION
@@ -177,10 +180,8 @@ def conv_finish(update, context):
         player_id,
     )
     database.verify_rr_player(update.message.from_user.id, player_id)
-    update.message.reply_text(
-        'Verificated your Rival Region player to Telegram. Type /accounts to see your accounts',
-        parse_mode=ParseMode.MARKDOWN
-    )
+    update.message.reply_text('Verificated your Rival Region player to Telegram')
+    commands.cmd_accounts(update, context)
     context.user_data.clear()
     return ConversationHandler.END
 
@@ -202,7 +203,7 @@ def conv_cancel(update, context):
 
 # announcement conversation
 ADD_CONV = ConversationHandler(
-    entry_points=[CommandHandler('add', conv_ask_player_id)],
+    entry_points=[CommandHandler('add', conv_start)],
     states={
         PLAYER_ID: [
             MessageHandler(Filters.regex(r'^\d*$'), conv_player_id_confirm),

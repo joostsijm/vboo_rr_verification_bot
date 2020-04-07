@@ -16,12 +16,14 @@ class Player(Base):
     nation = Column(String)
     registration_date = Column(Date)
 
+
 class TelegramAccount(Base):
     """Model for Telegram account"""
     __tablename__ = 'telegram_account'
     id = Column(BigInteger, primary_key=True)
     name = Column(String)
     registration_date = Column(DateTime)
+
 
 class TelegramHandle(Base):
     """Model for Telegram handle"""
@@ -35,6 +37,7 @@ class TelegramHandle(Base):
         'TelegramAccount',
         backref=backref('account_handles', lazy='dynamic')
     )
+
 
 class PlayerTelegram(Base):
     """Model for belongs to"""

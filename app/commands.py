@@ -13,17 +13,17 @@ def cmd_start(update, context):
             update.message.from_user.first_name
         )
     )
-    telegram_player = database.get_telegram_player(update.message.from_user.id)
-    if not telegram_player:
-        database.add_telegram_player(update)
-
+    telegram_account = database.get_telegram_account(update.message.from_user.id)
+    if not telegram_account:
+        database.add_telegram_account(update)
 
 def cmd_help(update, context):
     """Help command"""
     message_list = [
         '**Command list**',
-        '/add - add account to list',
-        '/accounts - list of accounts',
+        '/add - add verified account',
+        '/remove - remove verified account',
+        '/accounts - list of verified accounts',
     ]
     message = '\n'.join(message_list)
     update.message.reply_text(message, parse_mode=ParseMode.MARKDOWN)
@@ -31,9 +31,9 @@ def cmd_help(update, context):
 def cmd_accounts(update, context):
     """Return player list"""
     message_list = ['Accounts verified to this Telgeram account:']
-    telegram_player = database.get_telegram_player(update.message.from_user.id)
-    if telegram_player:
-        players = database.get_rr_players(telegram_player)
+    telegram_account = database.get_telegram_account(update.message.from_user.id)
+    if telegram_account:
+        players = database.get_rr_players(telegram_account)
     else:
         players = []
     if not players:

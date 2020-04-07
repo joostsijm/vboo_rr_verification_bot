@@ -14,7 +14,6 @@ class PlayerNotFoundException(Exception):
         Exception.__init__(self, *args, **kwargs)
         LOGGER.warning('PlayerNotFoundException')
 
-
 def get_rr_player(player_id):
     """Get Rival Region player"""
     response = requests.get(
@@ -23,6 +22,7 @@ def get_rr_player(player_id):
     )
     soup = BeautifulSoup(response.text, 'html.parser')
     player = {
+        'id': player_id,
         'name': None,
         'region': None,
         'residency': None,
